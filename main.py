@@ -47,14 +47,16 @@ class Scrape:
 
 
 class Downloader:
+    sizes = {'l':'large', 'm':'medium', 's':'small', 'o':'orig', 't':'thumb'}
     # if complete is False, stop downloading upon encountering a file that's
     # already been downloaded before
-    def __init__(self, user, base_dir='artists', complete=False):
+    def __init__(self, user, base_dir='artists', complete=False, size='large'):
         self.complete = complete
         self.base_dir = base_dir
         self.download_dir = f"{base_dir}/{user}"
         self.total_size = 0
         self.total_count = 0
+        self.size = size
 
     def download(self, urls):
         if not os.path.exists(self.base_dir):
@@ -72,7 +74,7 @@ class Downloader:
 
             print(f"Downloading {url}")
 
-            r = requests.get(url, allow_redirects=True)
+            r = requests.get(f"{url}:{self.size}", allow_redirects=True)
             total_size = int(r.headers.get('content_length', 0))
             self.total_size += total_size
             self.total_count += 1
@@ -88,13 +90,26 @@ class Downloader:
 
 def main():
     user = input("Input username: ")
+    size = input("Download image size:\n"
+                 "  - [l]arge \n"
+                 "  - [m]edium\n"
+                 "  - [s]mall \n"
+                 "  - [o]rig  \n"
+                 "  - [t]humb \n").strip()
+    if size in Downloader.sizes:
+        size = Downloader.sizes[size]
+    
+    if size not in Downloader.sizes.values():
+        print("Invalid size, using 'large' instead.")
+        size = "large"
+
     try:
         sc = Scrape(user)
     except RuntimeError as e:
         print(e.args[0])
         return
 
-    dl = Downloader(user, complete=True)
+    dl = Downloader(user, complete=True, size=size)
 
     while (content := sc.get_next()):
         if "includes" not in content:

@@ -60,8 +60,8 @@ class Downloader:
         if not os.path.exists(self.base_dir):
             os.mkdir(self.base_dir)
 
-        if not os.path.exists(f"{self.download_dir}"):
-            os.mkdir(f"{self.download_dir}")
+        if not os.path.exists(self.download_dir):
+            os.mkdir(self.download_dir)
 
         for url in urls:
             filename = url.rsplit('/', 1)[1]
